@@ -64,6 +64,10 @@ type InitHelperConfig struct {
 	Version    *string                     `json:"version,omitempty"`
 }
 
+type JobConfig struct {
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
 type NodePool struct {
 	Component                 string                            `json:"component"`
 	Replicas                  int32                             `json:"replicas"`
@@ -262,6 +266,7 @@ type ClusterSpec struct {
 	Security   *Security        `json:"security,omitempty"`
 	NodePools  []NodePool       `json:"nodePools"`
 	InitHelper InitHelperConfig `json:"initHelper,omitempty"`
+	Job        JobConfig        `json:"job,omitempty"`
 }
 
 // ClusterStatus defines the observed state of Es

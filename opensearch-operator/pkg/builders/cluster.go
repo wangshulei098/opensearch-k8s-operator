@@ -315,6 +315,7 @@ func NewSTSForNodePool(
 			Name:            "keystore",
 			Image:           image.GetImage(),
 			ImagePullPolicy: image.GetImagePullPolicy(),
+			Resources:       resources,
 			Command: []string{
 				"sh",
 				"-c",
@@ -464,6 +465,7 @@ func NewSTSForNodePool(
 			Name:            "init-sysctl",
 			Image:           initHelperImage.GetImage(),
 			ImagePullPolicy: initHelperImage.GetImagePullPolicy(),
+			Resources:       resources,
 			Command: []string{
 				"sysctl",
 				"-w",
@@ -651,7 +653,7 @@ func NewBootstrapPod(
 		helpers.ClusterLabel: cr.Name,
 	}
 	resources := cr.Spec.Bootstrap.Resources
-
+	initResources := cr.Spec.InitHelper.Resources
 	var jvm string
 	if cr.Spec.Bootstrap.Jvm == "" {
 		jvm = "-Xmx512M -Xms512M"
@@ -743,6 +745,7 @@ func NewBootstrapPod(
 			Name:            "init",
 			Image:           initHelperImage.GetImage(),
 			ImagePullPolicy: initHelperImage.GetImagePullPolicy(),
+			Resources:       initResources,
 			Command:         []string{"sh", "-c"},
 			Args:            []string{"chown -R 1000:1000 /usr/share/opensearch/data"},
 			SecurityContext: &corev1.SecurityContext{
@@ -803,6 +806,7 @@ func NewBootstrapPod(
 			Name:            "init-sysctl",
 			Image:           initHelperImage.GetImage(),
 			ImagePullPolicy: initHelperImage.GetImagePullPolicy(),
+			Resources:       initResources,
 			Command: []string{
 				"sysctl",
 				"-w",
@@ -885,6 +889,7 @@ func NewSnapshotRepoconfigUpdateJob(
 	volumes []corev1.Volume,
 	volumeMounts []corev1.VolumeMount,
 ) batchv1.Job {
+	resources := instance.Spec.Job.Resources
 	httpPort, _ := helpers.VersionCheck(instance)
 	dns := DnsOfService(instance)
 	var snapshotCmd string
@@ -932,6 +937,7 @@ func NewSnapshotRepoconfigUpdateJob(
 						Name:            "snapshotrepoconfig",
 						Image:           image.GetImage(),
 						ImagePullPolicy: image.GetImagePullPolicy(),
+						Resources:       resources,
 						Command:         []string{"/bin/bash", "-c"},
 						Args:            []string{snapshotCmd},
 						VolumeMounts:    volumeMounts,
@@ -959,6 +965,7 @@ func NewSecurityconfigUpdateJob(
 	adminKey := "/certs/tls.key"
 	caCert := "/certs/ca.crt"
 
+	resources := instance.Spec.Job.Resources
 	// Dummy node spec required to resolve image
 	node := opsterv1.NodePool{
 		Component: "securityconfig",
@@ -1004,6 +1011,7 @@ func NewSecurityconfigUpdateJob(
 						Name:            "updater",
 						Image:           image.GetImage(),
 						ImagePullPolicy: image.GetImagePullPolicy(),
+						Resources:       resources,
 						Command:         []string{"/bin/bash", "-c"},
 						Args:            []string{arg},
 						VolumeMounts:    volumeMounts,
